@@ -1,0 +1,77 @@
+int LedPin1 = 9;        // Assigning the first LED pin number to a variable
+int LedPin2 = 10;       // Assigning the second LED pin number to a variable
+int InputPin1 = 2;      // Assigning the first PIR sensor input pin number to a variable
+int InputPin2 = 3;      // Assigning the second PIR sensor input pin number to a variable
+int PirState1 = LOW;    // Initializing the first PIR state as LOW (no motion detected)
+int PirState2 = LOW;    // Initializing the second PIR state as LOW (no motion detected)
+
+
+
+void setup() {
+  pinMode(LedPin1, OUTPUT);   // Setting the first LED pin as an output
+  pinMode(LedPin2, OUTPUT);   // Setting the second LED pin as an output
+  pinMode(InputPin1, INPUT);  // Setting the first PIR sensor pin as an input
+  pinMode(InputPin2, INPUT);  // Setting the second PIR sensor pin as an input
+  Serial.begin(9600);         // Initializing serial communication at 9600 baud
+  
+  attachInterrupt(digitalPinToInterrupt(InputPin1), motionDetected1, CHANGE); // Attaching nterrupt for first PIR sensor
+  attachInterrupt(digitalPinToInterrupt(InputPin2), motionDetected2, CHANGE); // Attaching interrupt for second PIR sensor
+}
+
+
+
+void loop() {
+  // Nothing to do in the loop function
+}
+
+
+
+void motionDetected1() {
+  
+  int val = digitalRead(InputPin1); // Reading the first PIR sensor input and store the value in val
+  if (val == HIGH) {           // Checking if motion is detected
+    digitalWrite(LedPin1, HIGH); // Turning on the first LED
+    if (PirState1 == LOW) {     // Checking if motion was not detected previously
+      Serial.println("Motion detected on PIR 1!"); // Printing message to serial monitor
+      Serial.println("LED ON");
+      PirState1 = HIGH;         // Setting the first PIR state to HIGH (motion detected)
+    }
+    
+    
+  } else {
+    
+    digitalWrite(LedPin1, LOW);  // Turning off the first LED
+    if (PirState1 == HIGH) {      // Checking if motion was detected previously
+      Serial.println("Motion ended on PIR 1!"); 
+      // print message to serial monitor
+       Serial.println("LED OFF");
+      PirState1 = LOW;           // Setting the first PIR state to LOW (no motion detected)
+    }
+  }
+}
+
+
+
+void motionDetected2() {
+  
+  int val = digitalRead(InputPin2); // Reading the second PIR sensor input and store the value in val
+  if (val == HIGH) {           // Checking if motion is detected
+    digitalWrite(LedPin2, HIGH); // Turning on the second LED
+    if (PirState2 == LOW) {     // Checking if motion was not detected previously
+      Serial.println("Motion detected on PIR 2!"); // Printing message to serial monitor
+      Serial.println("LED ON");
+      PirState2 = HIGH;         // Setting the second PIR state to HIGH (motion detected)
+    }
+    
+    
+  } else {
+    
+    digitalWrite(LedPin2, LOW);  // Turning off the second LED
+    if (PirState2 == HIGH) {      // Checking if motion was detected previously
+      Serial.println("Motion ended on PIR 2!");  // Printing message to serial monitor
+      Serial.println("LED OFF");
+      PirState2 = LOW;           // Setting the second PIR
+
+}
+}
+}
