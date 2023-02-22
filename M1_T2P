@@ -1,0 +1,58 @@
+// Define the LED pin number as a variable.
+int ledPin = 9;
+
+// Define the PIR sensor input pin number as a variable.
+int inputPin = 2;
+
+// Initialize the PIR state as LOW (no motion detected).
+int pirState = LOW;
+
+void setup(){
+// Set the LED pin as an output.
+pinMode(ledPin, OUTPUT);
+
+// Set the PIR sensor pin as an input.
+pinMode(inputPin, INPUT);
+
+// Initialize serial communication at 9600 baud.
+Serial.begin(9600);
+
+// Attach an interrupt to the PIR sensor pin to detect motion.
+attachInterrupt(digitalPinToInterrupt(inputPin), motionDetected, CHANGE);
+}
+void loop() {
+// Nothing to do in the loop function.
+}
+
+// Define a function to be executed when motion is detected.
+void motionDetected() {
+  // Read the PIR sensor input and store the value in a variable.
+  int val = digitalRead(inputPin);
+  
+  // Check if motion is detected.
+  if (val == HIGH) {
+    // Turn on the LED.
+    digitalWrite(ledPin, HIGH);
+    
+    // Check if motion was not detected previously.
+    if (pirState == LOW) {
+      // Print a message to the serial monitor.
+      Serial.println("Motion detected!");
+      
+      // Set the PIR state to HIGH (motion detected).
+      pirState = HIGH;
+    }
+  } else {
+    // Turn off the LED.
+    digitalWrite(ledPin, LOW);
+    
+    // Check if motion was detected previously.
+    if (pirState == HIGH) {
+      // Print a message to the serial monitor.
+      Serial.println("Motion ended!");
+      
+      // Set the PIR state to LOW (no motion detected).
+      pirState = LOW;
+    }
+  }
+}
