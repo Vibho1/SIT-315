@@ -1,0 +1,160 @@
+int LedPin1 = 8;        // Assigning the first LED pin number to a variable
+int LedPin2 = 9;       // Assigning the second LED pin number to a variable
+int LedPin3 = 11;      // Assigning the third LED pin number to a variable
+int LedPin4 = 12;	   // Assigning the fourth LED pin number to a variable
+
+int InputPin1 = 2;      // Assigning the first PIR sensor input pin number to a variable
+int InputPin2 = 3;      // Assigning the second PIR sensor input pin number to a variable
+int InputPin3 = 4;      // Assigning the third PIR sensor input pin number to a variable 
+
+int PirState1 = LOW;    // Initializing the first PIR state as LOW (no motion detected)
+int PirState2 = LOW;    // Initializing the second PIR state as LOW (no motion detected)
+int PirState3 = LOW;    // Initializing the third PIR state as LOW (no motion detected)
+
+
+void setup() {
+  
+  pinMode(LedPin1, OUTPUT);   // Setting the first LED pin as an output
+  pinMode(LedPin2, OUTPUT);   // Setting the second LED pin as an output
+  pinMode(LedPin3, OUTPUT);   // Setting the third LED pin as an output
+  pinMode(LedPin4, OUTPUT);
+  
+  pinMode(InputPin1, INPUT);  // Setting the first PIR sensor pin as an input
+  pinMode(InputPin2, INPUT);  // Setting the second PIR sensor pin as an input
+  pinMode(InputPin3, INPUT);  // Setting the third PIR sensor pin as an input
+  
+  
+  Serial.begin(9600);         // Initializing serial communication at 9600 baud
+  
+  
+  attachInterrupt(digitalPinToInterrupt(InputPin1), motionDetected1, CHANGE); // Attaching interrupt for first PIR sensor
+  attachInterrupt(digitalPinToInterrupt(InputPin2), motionDetected2, CHANGE); // Attaching interrupt for second PIR sensor
+   pciSetup(4);
+  startTimer(0.5); // Starting timer with frequency of 0.5 Hz (which blinks every 2 seconds)
+
+  
+}
+
+
+void loop() {
+  
+  // There is nothing to do in the loop function
+}
+
+
+void pciSetup(byte pin)
+{
+  
+    *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // Enabling pin
+    PCIFR  |= bit (digitalPinToPCICRbit(pin)); // Clearing any outstanding interrupt
+    PCICR  |= bit (digitalPinToPCICRbit(pin)); // Enabling interrupt for the group
+  
+}
+
+ISR (PCINT2_vect) // Here I am handling pin change interrupt for D0 to D7
+  
+ {
+  
+     motionDetected3();
+  
+ } 
+
+void startTimer(double timerFrequency)
+{
+  noInterrupts();
+
+  
+  // Calculating the value for OCR1A based on the timer frequency
+  uint16_t ocrValue = (uint16_t)(F_CPU / 1024.0 / timerFrequency - 1);
+
+  
+  // Setting the Timer1 registers for CTC mode and set the OCR1A value
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1  = 0;
+  OCR1A = ocrValue;
+  TCCR1B |= (1 << WGM12);
+  TCCR1B |= (1 << CS12) | (1 << CS10);
+  TIMSK1 |= (1 << OCIE1A);
+
+  
+  interrupts();
+}
+
+ISR(TIMER1_COMPA_vect) {
+  
+  digitalWrite(LedPin4, digitalRead(LedPin4)^1);
+  
+}
+
+void motionDetected1() {
+  
+  int val = digitalRead(InputPin1); // Reading the first PIR sensor input and store the value in val
+  if (val == HIGH) {           // Checking if motion is detected
+    digitalWrite(LedPin1, HIGH); // Turning on the first LED
+    if (PirState1 == LOW) {     // Checking if motion was not detected previously
+      Serial.println("Motion detected on PIR 1!"); // Printing message to serial monitor
+      Serial.println("LED ON");
+      PirState1 = HIGH;         // Setting the first PIR state to HIGH (motion detected)
+    }
+  } 
+  
+  else {
+    digitalWrite(LedPin1, LOW);  // Turning off the first LED
+    if (PirState1 == HIGH) {      // Checking if motion was detected previously
+      Serial.println("Motion ended on PIR 1!"); 
+      // Printing message to serial monitor
+       Serial.println("LED OFF");
+      PirState1 = LOW;           // Setting the first PIR state to LOW (no motion detected)
+      
+    }
+  }
+}
+
+
+void motionDetected2() {
+  
+  int val = digitalRead(InputPin2); // Reading the second PIR sensor input and store the value in val
+  if (val == HIGH) {           // Checking if motion is detected
+    digitalWrite(LedPin2, HIGH); // Turning on the second LED
+    if (PirState2 == LOW) {     // Checking if motion was not detected previously
+      Serial.println("Motion detected on PIR 2!"); // Printing message to serial monitor
+      Serial.println("LED ON");
+      PirState2 = HIGH;         // Setting the second PIR state to HIGH (motion detected)
+    }
+    
+  } 
+  else {
+    
+    digitalWrite(LedPin2, LOW);  // Turning off the second LED
+    if (PirState2 == HIGH) {      // Checking if motion was detected previously
+      Serial.println("Motion ended on PIR 2!");  // Printing message to serial monitor
+      Serial.println("LED OFF");
+      PirState2 = LOW;           // Setting the second PIR
+
+}
+}
+}
+
+void motionDetected3() {
+  
+  int val = digitalRead(InputPin3); // Reading the second PIR sensor input and store the value in val
+  if (val == HIGH) {           // Checking if motion is detected
+    digitalWrite(LedPin3, HIGH); // Turning on the second LED
+    if (PirState3 == LOW) {     // Checking if motion was not detected previously
+      Serial.println("Motion detected on PIR 3!"); // Printing message to serial monitor
+      Serial.println("LED ON");
+      PirState3 = HIGH;         // Setting the second PIR state to HIGH (motion detected)
+    }
+    
+  } 
+  else {
+    digitalWrite(LedPin3, LOW);  // Turning off the second LED
+    if (PirState3 == HIGH) {      // Checking if motion was detected previously
+      Serial.println("Motion ended on PIR 3!");  // Printing message to serial monitor
+      Serial.println("LED OFF");
+      PirState3 = LOW;           // Setting the second PIR
+
+}
+}
+}
